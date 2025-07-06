@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AUDIO THRU</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #message {
+    text-align: center;
+    font-size: 2em;
+    padding: 1em;
+    flex: 0 0 auto;
+  }
+  form {
+    flex: 1 1 50%;
+    margin: 0;
+  }
+  button {
+    width: 100%;
+    height: 100%;
+    font-size: 2em;
+    border: none;
+    cursor: pointer;
+  }
+  #enable {
+    background: #28a745;
+    color: white;
+  }
+  #disable {
+    background: #dc3545;
+    color: white;
+  }
+</style>
+</head>
+<body>
+  <div id="message">{{ message }}</div>
+  <form action="/enable" method="post"><button id="enable">AUDIO THRU</button></form>
+  <form action="/disable" method="post"><button id="disable">MUTE</button></form>
+</body>
+</html>

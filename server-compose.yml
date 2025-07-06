@@ -1,0 +1,107 @@
+# dclint disable service-image-require-explicit-tag
+name: mpd
+services:
+  alsa-web:
+    image: oliviertremblaynoel/alsa-web:latest
+    volumes:
+      - /usr/share/alsa:/usr/share/alsa
+    ports:
+      - '0.0.0.0:8000:80'
+    restart: unless-stopped
+    devices:
+      - /dev/snd
+
+  # Powerful CLI Music library manager
+  beets:
+    image: oliviertremblaynoel/beets:latest
+    volumes:
+      - ${BEETS_CONFIG_VOL}:/config
+      - ${BEETS_DB_VOL}:/db
+      - ${MUSIC_LIB_VOL}:/music
+      - ${MUSIC_DOWNLOAD_FOLDER}:/downloads # OPTIONAL: Digest from here
+    environment:
+      - TZ=${TZ}
+      - PUID=1000
+      - PGID=1000
+      - EDITOR=micro
+    ports:
+      - '0.0.0.0:7681:7681' # ttyd
+      - '0.0.0.0:8337:8337' # beets web
+    restart: unless-stopped
+
+  # Audio player
+  mpd:
+    image: oliviertremblaynoel/mpd:latest
+    volumes:
+      - ${MPD_DATA_VOL}:/var/lib/mpd
+      - ${MPD_PLAYLISTS_VOL}:/playlists:rw
+      - ${MUSIC_LIB_VOL}:/music:ro
+      - ${FIFO_PIPE_FILE}:/tmp/snapfifo
+        # Pipe to share data between containers in realtime.
+        # Needs to be created before on host with mkfifo (see readme.md).
+      # - ./mpd.conf:/etc/mpd.conf      # Optional, if we need to modify conf
+    environment:
+      - TZ=${TZ}
+    restart: unless-stopped
+
+  # Front end for MPD
+  mympd:
+    image: ghcr.io/jcorporation/mympd/mympd:latest
+    depends_on:
+      - mpd
+    volumes:
+      - ${MUSIC_LIB_VOL}:/music:ro
+      - ${MPD_PLAYLISTS_VOL}:/playlists:rw
+      - ${MYMPD_DATA_VOL}:/var/lib/mympd:rw
+      - ${MYMPD_CACHE_VOL}:/var/cache/mympd:rw
+    environment:
+      - TZ=${TZ}
+    ports:
+      - '0.0.0.0:8001:80'
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -nzv -w 3 127.0.0.1 80 || exit 1" ]
+      interval: 300s
+      timeout: 5s
+      retries: 3
+
+  # Use the server's audio output for playback, launch a local client.
+  # Tested with Debian
+  snapclient:
+    image: oliviertremblaynoel/snapcast-client:latest
+    environment:
+      - SNAP_SERVER_HOSTNAME=snapserver
+      - CLIENT_ID=${LOCAL_CLIENT_ID}
+      - PLAYER_TYPE=alsa # Match the host's engine
+    restart: unless-stopped
+    devices:
+      - "/dev/snd:/dev/snd" # Sharing the audio hardware with container
+    hostname: ${SNAPCAST_CLIENT_NAME}
+
+  # Read audio from FIFO pipe and stream on lan, syncing the clients' latencies
+  # Also serves a web ui for client volumes control
+  # Tested with debian
+  snapserver:
+    image: oliviertremblaynoel/snapcast-server:latest
+    depends_on:
+      - mpd
+    volumes:
+      - ${SNAPSERVER_SESSION_VOL}:/root/.config/snapserver
+        # Persistence of the state of the app
+        # (volumes, latencies, friendly names, etc)
+      - ${FIFO_PIPE_FILE}:/tmp/snapfifo
+        # Pipe to share data between containers in realtime.
+        # Needs to be created before on host with mkfifo
+        # (see readme.md).
+      # - ./snapserver.conf:/etc/snapserver.conf            # Optional, if we need to modify conf
+    ports:
+      - '0.0.0.0:1704:1704' # Exposing snapserver audio stream on lan
+      - '0.0.0.0:1780:1780' # Exposing snapcast web-ui
+    restart: unless-stopped
+    devices:
+      - "/dev/snd:/dev/snd"
+        # Sharing the audio hardware with container
+        # Required with the analog motherboard jack input
+        # (see config)
+        # Example use case :
+        # Plug a bluetooth sink device in motherboard's jack analog input to distribute bluetooth audio from phone to all snapcast clients.

@@ -1,0 +1,23 @@
+# dclint disable service-image-require-explicit-tag
+
+################################################################################
+# - This client uses the desktop's pulseaudio session.
+# - This way, the soundcard is not monopolized by the container and the user can
+#   still play other media as usual
+# - It works transparently through pipewire-pulse.
+# - Tested in debian environment
+################################################################################
+
+name: snapclient
+services:
+  app:
+    image: oliviertremblaynoel/snapcast-client:latest
+    volumes:
+      - /run/user/1000/pulse:/run/user/1000/pulse # The logged user's pulse session
+    environment:
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native # Required for pulse player_type
+      - PLAYER_TYPE=pulse # Using alsa would monopolize sound card
+      - SNAP_SERVER_HOSTNAME=${SERVER_HOST}
+      - CLIENT_ID=${CLIENT_ID}
+    restart: unless-stopped
+    hostname: ${HOSTNAME}
