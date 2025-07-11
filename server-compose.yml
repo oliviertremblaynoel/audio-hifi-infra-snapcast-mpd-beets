@@ -36,7 +36,7 @@ services:
       - ${MPD_DATA_VOL}:/var/lib/mpd
       - ${MPD_PLAYLISTS_VOL}:/playlists:rw
       - ${MUSIC_LIB_VOL}:/music:ro
-      - ${FIFO_PIPE_FILE}:/tmp/snapfifo
+      - pipe:/pipe
         # Pipe to share data between containers in realtime.
         # Needs to be created before on host with mkfifo (see readme.md).
       # - ./mpd.conf:/etc/mpd.conf      # Optional, if we need to modify conf
@@ -89,7 +89,7 @@ services:
       - ${SNAPSERVER_SESSION_VOL}:/root/.config/snapserver
         # Persistence of the state of the app
         # (volumes, latencies, friendly names, etc)
-      - ${FIFO_PIPE_FILE}:/tmp/snapfifo
+      - pipe:/pipe
         # Pipe to share data between containers in realtime.
         # Needs to be created before on host with mkfifo
         # (see readme.md).
@@ -105,3 +105,6 @@ services:
         # (see config)
         # Example use case :
         # Plug a bluetooth sink device in motherboard's jack analog input to distribute bluetooth audio from phone to all snapcast clients.
+
+volumes:
+  pipe:
