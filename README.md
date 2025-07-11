@@ -9,11 +9,6 @@ Straight forward IaC setup for the audiophile.
 - Dockerfiles to build new or improved images
 - Automated CI Pipeline to keep the images up-to-date
 
-## Requirements
-
-- The music library is accessible to docker on the host.
-- This configuration uses a FIFO Pipe for data stream from mpd (write) to snapcast server (read). For this to work, you need to create a FIFO Pipe with `mkfifo /path/to/snapfifo`.
-
 ## Recommended
 
 - Use watchtower docker container to automate continuous deployment (CD)
