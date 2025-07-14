@@ -11,7 +11,10 @@ LABEL org.opencontainers.image.authors="Olivier Tremblay-Noel" \
 
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
-    snapcast-client
+    snapcast-client \
+    pipewire-alsa
+
+COPY ./asound.conf /etc/asound.conf
 
 # hadolint ignore=DL3025
 ENTRYPOINT snapclient --host "$SNAP_SERVER_HOSTNAME" --hostID "$CLIENT_ID" --player "$PLAYER_TYPE"
