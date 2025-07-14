@@ -12,8 +12,7 @@ LABEL org.opencontainers.image.authors="Olivier Tremblay-Noel" \
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
     snapcast-client \
-    pipewire-alsa
-
+    pipewire-alsa pipewire alsa-utils
 COPY ./asound.conf /etc/asound.conf
 
 # hadolint ignore=DL3025

@@ -30,14 +30,14 @@ LABEL \
 
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
-    snapcast-server \
+        pipewire-alsa pipewire alsa-utils snapcast-server \
     ; \
     mkdir /root/.config/snapserver ; \
-    touch /root/.config/snapserver/server.json \
-    ; \
+    touch /root/.config/snapserver/server.json ; \
     cp /etc/snapserver.conf /etc/snapserver.conf.backup ; \
     mv /etc/snapserver.conf.new /etc/snapserver.conf ;
 
+COPY ./asound.conf /etc/asound.conf
 VOLUME /root/.config/snapserver
 WORKDIR /root/.config/snapserver
 
