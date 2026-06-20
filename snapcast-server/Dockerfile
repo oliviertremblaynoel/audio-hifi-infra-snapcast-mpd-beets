@@ -7,7 +7,7 @@ RUN apk add --no-cache git
 
 WORKDIR /app
 
-RUN git clone https://github.com/badaix/snapweb . \
+RUN git clone https://github.com/snapcast/snapweb.git . \
     && npm ci \
     && npm run build
 
