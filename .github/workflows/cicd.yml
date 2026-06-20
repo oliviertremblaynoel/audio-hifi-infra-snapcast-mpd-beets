@@ -40,9 +40,9 @@
           uses: docker/setup-buildx-action@v3
 
         - name: Build and push image
-          uses: docker/build-push-action@v6
+          uses: docker/build-push-action@v7
           with:
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64
             context: ${{ matrix.folder }}
             pull: true
             push: true
