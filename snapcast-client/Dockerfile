@@ -16,7 +16,7 @@ RUN apk add --no-cache \
 COPY ./asound.conf /etc/asound.conf
 
 # hadolint ignore=DL3025
-ENTRYPOINT snapclient --hostID "$CLIENT_ID" --player "$PLAYER_TYPE" "$SNAP_SERVER_HOSTNAME"
+ENTRYPOINT ["sh", "-c", "exec snapclient --hostID \"$CLIENT_ID\" --player \"$PLAYER_TYPE\" \"$SNAP_SERVER_URI\""]
 
 HEALTHCHECK --interval=300s --timeout=5s --retries=3 \
     CMD pgrep snapclient || exit 1
